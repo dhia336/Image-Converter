@@ -1,17 +1,38 @@
 from PIL import Image
 import customtkinter as ctk
 from tkinterdnd2 import TkinterDnD, DND_FILES
+from tkinter import messagebox
+import os
+from threading import Thread
 # Functions
+def get_dir_from_file(ch:str):
+    a = ch.rfind("/")
+    return ch
+def get_ext_from_file(ch:str):
+    a = ch.rfind(".")
+    if a!= -1:
+        return ch[a:].upper()
+    else :
+        return None
 def check_all()->str:
-    pass
+    ch = ""
+    if optionmenu_var.get() not  in ['JPEG', 'BMP','PNG', 'ICO', 'GIF']:
+        return "choose an output format"
+    if input_entry.get()=="" or not os.path.isfile(input_entry.get()):
+        return "pls enter a valid input file"
+    if (output_entry.get()=="" and check_var.get()=="off") :
+        return "pls enter a valid output path 1"
+    if ((not os.path.isdir(output_entry.get())) and (check_var.get()=="off")):
+        return "pls enter a valid output path 2"
+    if get_ext_from_file(output_entry.get())==optionmenu.get():
+        return "output must not have same format as input"
+    return ch
 def convert_image(input:str, output:str, format:str)->None:
     with Image.open(input) as img:
-
         if format in ['JPEG', 'BMP'] and img.mode == 'RGBA':
             img = img.convert('RGB')  # Remove alpha channel
         elif format in ['PNG', 'ICO', 'GIF'] and img.mode != 'RGBA':
             img = img.convert('RGBA')  # transparency support
-        
         img.save(output, format=format)
 # main function
 def main():
@@ -32,29 +53,44 @@ optionmenu.pack(padx = 10,pady = 5,side = ctk.LEFT)
 # input and output
 export_frame = ctk.CTkFrame(root, width=200, height=200)
 export_frame.pack(padx = 10,pady = 5)
-input_btn = ctk.CTkButton(export_frame, text='Input Path', width=40, height=28)
+def input_btn_func():
+    ch = ctk.filedialog.askopenfilename(title="File Name")
+    if ch:
+        input_entry.delete(0,len(input_entry.get()))
+        input_entry.insert(0,ch)
+input_btn = ctk.CTkButton(export_frame, text='Oringinal FIle', width=40, height=28,command=input_btn_func)
 input_btn.grid(column=0, row=0,padx = (30,20),pady = 5,ipadx = 20,ipady = 5)
-input_entry = ctk.CTkEntry(export_frame, placeholder_text='Path', width=140, height=28)
+input_entry = ctk.CTkEntry(export_frame, placeholder_text='Path', width=300, height=28)
 input_entry.grid(column=1, row=0,padx = (5,100),pady = 5)
-output_btn = ctk.CTkButton(export_frame, text='Output Path', width=40, height=28)
+def output_btn_func():
+    ch = ctk.filedialog.askdirectory(title="Output Folder")
+    if ch:
+        output_entry.delete(0,len(output_entry.get()))
+        output_entry.insert(0,ch)
+output_btn = ctk.CTkButton(export_frame, text='Output Folder', width=40, height=28,command=output_btn_func)
 output_btn.grid(column=2, row=0,padx = 5,pady = 5,ipadx = 20,ipady = 5)
-output_entry = ctk.CTkEntry(export_frame, placeholder_text='Path', width=140, height=28)
+output_entry = ctk.CTkEntry(export_frame, placeholder_text='Path', width=300, height=28)
 output_entry.grid(column=3, row=0,padx = 5,pady = 5)
 def checkbox_event():
     if check_var.get()=="on":
-        output_entry.configure(state = "readonly")
+        output_entry.configure(state = "disabled")
         output_btn.configure(state = "disabled")
     else:
         output_entry.configure(state = "normal")
         output_btn.configure(state = "normal")
-
 check_var = ctk.StringVar(value='off')
 checkbox = ctk.CTkCheckBox(export_frame, text='Output path same as Input', command=checkbox_event,
                                      width=100, height=24, checkbox_width=24, checkbox_height=24,
                                      variable=check_var, onvalue='on', offvalue='off',)
 checkbox.grid(column=3, row=1,padx = (0,20),pady = 5)
 def convert_button_event():
-    print('button pressed')
+    ch = check_all()
+    if ch:
+        messagebox.showerror("ERROR",ch)
+        #convert_image(input_entry.get(),output_entry.get(),optionmenu_var.get())
+    else:
+        pass
+        
 
 cnv_button = ctk.CTkButton(root, text='Convert', width=140, height=28,command=convert_button_event,font=("",18))
 cnv_button.pack(pady = (20,10),ipadx = 20,ipady = 5)
