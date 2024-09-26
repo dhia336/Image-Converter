@@ -75,9 +75,13 @@ def checkbox_event():
     if check_var.get()=="on":
         output_entry.configure(state = "disabled")
         output_btn.configure(state = "disabled")
+        output_entry.grid_forget()
+        output_btn.grid_forget()
     else:
         output_entry.configure(state = "normal")
         output_btn.configure(state = "normal")
+        output_entry.grid(column=3, row=0,padx = 5,pady = 5)
+        output_btn.grid(column=2, row=0,padx = 5,pady = 5,ipadx = 20,ipady = 5)
 check_var = ctk.StringVar(value='off')
 checkbox = ctk.CTkCheckBox(export_frame, text='Output path same as Input', command=checkbox_event,
                                      width=100, height=24, checkbox_width=24, checkbox_height=24,
