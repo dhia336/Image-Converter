@@ -1,6 +1,5 @@
 from PIL import Image
 import customtkinter as ctk
-from tkinterdnd2 import TkinterDnD, DND_FILES
 from tkinter import messagebox
 import os
 from threading import Thread
@@ -27,13 +26,13 @@ def check_all()->str:
     if get_ext_from_file(output_entry.get())==optionmenu.get():
         return "output must not have same format as input"
     return ch
-def convert_image(input:str, output:str, format:str)->None:
+def convert_image(input:str, output:str, forma:str)->None:
     with Image.open(input) as img:
-        if format in ['JPEG', 'BMP'] and img.mode == 'RGBA':
+        if forma in ['JPEG', 'BMP'] and img.mode == 'RGBA':
             img = img.convert('RGB')  # Remove alpha channel
-        elif format in ['PNG', 'ICO', 'GIF'] and img.mode != 'RGBA':
+        elif forma in ['PNG', 'ICO', 'GIF'] and img.mode != 'RGBA':
             img = img.convert('RGBA')  # transparency support
-        img.save(output, format=format)
+        img.save(f"{output}\\ConvertedImage.{forma.lower()}", format=forma)
 # main function
 def main():
     root.mainloop()
@@ -85,16 +84,17 @@ def checkbox_event():
 check_var = ctk.StringVar(value='off')
 checkbox = ctk.CTkCheckBox(export_frame, text='Output path same as Input', command=checkbox_event,
                                      width=100, height=24, checkbox_width=24, checkbox_height=24,
-                                     variable=check_var, onvalue='on', offvalue='off',)
+                                     variable=check_var, onvalue='on', offvalue='off',
+                                     corner_radius=25,border_width=1)
 checkbox.grid(column=3, row=1,padx = (0,20),pady = 5)
 def convert_button_event():
     ch = check_all()
     if ch:
         messagebox.showerror("ERROR",ch)
-        #convert_image(input_entry.get(),output_entry.get(),optionmenu_var.get())
     else:
-        pass
-        
+        a = Thread(target=convert_image,args=(input_entry.get(),output_entry.get(),optionmenu_var.get()))
+        a.start()
+        messagebox.showinfo("Convetion","Done !")      
 
 cnv_button = ctk.CTkButton(root, text='Convert', width=140, height=28,command=convert_button_event,font=("",18))
 cnv_button.pack(pady = (20,10),ipadx = 20,ipady = 5)
